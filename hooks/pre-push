@@ -14,9 +14,14 @@ while read -r local_ref local_sha remote_ref remote_sha; do
   # Deletions
   [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue
 
-  # New branch (no remote yet)
+  # New branch (no remote yet): only check commits not already on origin/main
   if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
-    RANGE="$local_sha"
+    BASE=$(git rev-parse "refs/remotes/origin/main" 2>/dev/null || true)
+    if [ -n "$BASE" ]; then
+      RANGE="${BASE}..${local_sha}"
+    else
+      RANGE="$local_sha"
+    fi
   else
     RANGE="$remote_sha..$local_sha"
   fi
