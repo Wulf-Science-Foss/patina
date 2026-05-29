@@ -212,12 +212,12 @@ Builds are run on both architectures. Multi-arch OCI images produced via apko on
 ### Branch hierarchy
 
 ```
-main                          # stable; never broken
-└── feat/<name>               # one branch per feature
-    └── feat/<name>--<change> # one sub-branch per discrete change
+main                           # stable; never broken
+└── <type>/<name>              # one branch per unit of work
+    └── <type>/<name>--<change># one sub-branch per discrete change
 ```
 
-Also: `fix/<name>`, `spec/<name>`, `chore/<name>` at the feature level, with `--<change>` sub-branches.
+`<type>` is any Conventional Commits prefix: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `spec`. The discipline applies equally to all of them — not just features.
 
 Note: Git does not allow a branch and its own path-prefix to coexist, so sub-branches use `--` as separator rather than `/` (e.g. `feat/phase-0--openplm-analysis`, not `feat/phase-0/openplm-analysis`).
 
