@@ -33,16 +33,20 @@ done
 
 [ -z "$TITLE" ] && usage
 
-PAYLOAD=$(printf '{"title":"%s","head":"%s","base":"%s","body":"%s"}' \
-  "$TITLE" "$HEAD" "$BASE" "$BODY")
+PAYLOAD=$(jq -n \
+  --arg title "$TITLE" \
+  --arg head  "$HEAD" \
+  --arg base  "$BASE" \
+  --arg body  "$BODY" \
+  '{"title":$title,"head":$head,"base":$base,"body":$body}')
 
 RESPONSE=$(curl -s -X POST \
   "${FORGEJO_URL}/api/v1/repos/${FORGEJO_OWNER}/${FORGEJO_REPO}/pulls" \
   -H "Authorization: token ${FORGEJO_TOKEN}" \
   -H "Content-Type: application/json" \
-  -d "$PAYLOAD")
+  --data-binary "$PAYLOAD")
 
-URL=$(echo "$RESPONSE" | grep -o '"html_url":"[^"]*"' | head -1 | cut -d'"' -f4)
+URL=$(printf '%s' "$RESPONSE" | jq -r '.html_url // empty')
 
 if [ -n "$URL" ]; then
   echo "PR created: $URL"
