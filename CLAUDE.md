@@ -42,7 +42,9 @@ Images:       distroless/undistro only — no shell, no package manager in runti
 ## Repository Hosting
 
 **Canonical:** `forgejo.wulf.science/WulfScience-FOSS/patina`
-**Mirror:** GitHub (`github.com/Wulf-Science/patina`) — read-only, auto-mirrored, for discoverability
+**Mirrors (read-only, auto-mirrored, for discoverability):**
+- GitHub: `github.com/Wulf-Science-Foss/patina`
+- GitLab: `gitlab.com/wulf-science-foss/patina`
 
 Forgejo mirroring to GitHub is built-in (Settings → Mirror). Set push interval to 1h.
 
