@@ -202,7 +202,6 @@ Builds are run on both architectures. Multi-arch OCI images produced via apko on
 |---|---|---|
 | `ci.yaml` | PR, push to main | cargo test, clippy, audit |
 | `image.yaml` | push to main | melange + apko build + grype scan |
-| `mirror.yaml` | push to main | push to GitHub read-only mirror |
 | `milestone-sync.yaml` | PR merged to main | parse roadmap markdown, sync Forgejo milestones via API |
 
 `milestone-sync.yaml` spec: [`docs/specs/ci-milestone-sync.spec.md`](docs/specs/ci-milestone-sync.spec.md)

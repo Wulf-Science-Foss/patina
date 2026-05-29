@@ -1,0 +1,24 @@
+name: Milestone Sync
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  sync:
+    if: ${{ github.event.pull_request.merged == true }}
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync milestones from roadmap checklists
+        env:
+          FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+          FORGEJO_URL: ${{ github.server_url }}
+          FORGEJO_OWNER: ${{ github.repository_owner }}
+          FORGEJO_REPO: ${{ github.event.repository.name }}
+        run: |
+          bash scripts/milestone-sync.sh \
+            --pr-number "${{ github.event.pull_request.number }}"
