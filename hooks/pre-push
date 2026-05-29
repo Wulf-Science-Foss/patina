@@ -1,0 +1,40 @@
+#!/usr/bin/env sh
+set -eu
+
+# Read refs from stdin (provided by git)
+# Format: <local_ref> <local_sha> <remote_ref> <remote_sha>
+# We check commits being pushed (remote_sha..local_sha)
+
+fail() {
+  echo "ERROR: $1" >&2
+  exit 1
+}
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  # Deletions
+  [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue
+
+  # New branch (no remote yet)
+  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+    RANGE="$local_sha"
+  else
+    RANGE="$remote_sha..$local_sha"
+  fi
+
+  # No commits
+  COMMITS=$(git rev-list "$RANGE" 2>/dev/null || true)
+  [ -z "$COMMITS" ] && continue
+
+  for c in $COMMITS; do
+    status=$(git log -1 --pretty="%G?" "$c")
+
+    case "$status" in
+      G|U) ;;  # signed (trusted or untrusted)
+      N) fail "commit $c is NOT signed" ;;
+      B|E|X|Y|R) fail "commit $c has invalid signature ($status)" ;;
+      *) fail "commit $c has unknown signature state ($status)" ;;
+    esac
+  done
+done
+
+echo "OK: all commits are signed."

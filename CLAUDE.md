@@ -1,0 +1,276 @@
+# CLAUDE.md — Patina Project
+
+## Project Vision
+
+A MIT-licensed, FOSS PLM/CMS system built in Rust. No open-core. No vendor lock-in.
+Revenue model: support, consulting, hosting only.
+
+Reference standard for process discipline: DO-178C (adapted for software tooling context).
+
+---
+
+## Core Principles
+
+- **MIT License** — permissive, no exceptions
+- **Spec-driven** — no code without a specification
+- **Test-driven** — no spec without tests; tests are the executable spec
+- **Security-first** — threat model before implementation
+- **Incremental** — working software at every phase boundary
+
+---
+
+## Technology Stack
+
+```
+Language:     Rust (stable toolchain, MSRV pinned in rust-toolchain.toml)
+Database:     PostgreSQL 15+
+ORM:          sqlx (async, compile-time query verification)
+API:          Axum
+Auth:         JWT + RBAC (no external IdP dependency for core)
+Frontend:     htmx + minimal CSS (no JS framework)
+Testing:      cargo test + cargo-nextest
+Linting:      clippy (deny warnings), rustfmt
+SBOM:         cargo-cyclonedx
+Audit:        cargo-audit (run in CI)
+Docs:         rustdoc + mdBook
+Packaging:    melange (build APK packages) + apko (assemble OCI images)
+Images:       distroless/undistro only — no shell, no package manager in runtime image
+```
+
+---
+
+## Repository Hosting
+
+**Canonical:** `forgejo.wulf.science/WulfScience-FOSS/patina`
+**Mirrors (read-only, auto-mirrored, for discoverability):**
+- GitHub: `github.com/Wulf-Science-Foss/patina`
+- GitLab: `gitlab.com/wulf-science-foss/patina`
+
+Forgejo mirroring to GitHub is built-in (Settings → Mirror). Set push interval to 1h.
+
+All issues, PRs, and CI live on Forgejo. GitHub is a read-only consumer surface only.
+GitHub issues disabled to avoid split community.
+
+---
+
+## Repository Structure
+
+```
+patina/
+├── CLAUDE.md               # This file
+├── SPEC.md                 # Master specification index
+├── THREAT_MODEL.md         # Security threat model
+├── CHANGELOG.md            # Semver changelog
+├── rust-toolchain.toml     # Pinned Rust version
+├── Cargo.toml
+├── Cargo.lock              # Committed (binary crate)
+├── assets/
+│   └── images/             # Logos and other images
+├── docs/
+│   ├── roadmap/            # Phase-by-phase plans and gate checklists
+│   ├── specs/              # Per-feature specifications (*.spec.md)
+│   ├── adr/                # Architecture Decision Records
+│   └── prior-art/          # Prior art analysis documents
+├── migrations/             # sqlx migrations (numbered, immutable)
+├── packaging/
+│   ├── melange.yaml        # APK build definition
+│   └── apko.yaml           # OCI image assembly definition
+├── src/
+│   ├── domain/             # Pure domain types, no I/O
+│   ├── db/                 # Repository layer
+│   ├── api/                # Axum handlers
+│   ├── auth/               # AuthN/AuthZ
+│   └── main.rs
+└── tests/
+    ├── integration/        # Black-box API tests
+    └── fixtures/           # Test data
+```
+
+---
+
+## Development Workflow (Mandatory)
+
+Every feature MUST follow this sequence. No exceptions.
+
+```
+PRIOR ART → SPEC → THREAT MODEL → TESTS (failing) → IMPLEMENTATION → TESTS (passing) → DOCS
+```
+
+### Phase Gate Checklist (per feature)
+
+- [ ] Prior art documented in `docs/prior-art/<feature>.md`
+- [ ] Specification written in `docs/specs/<feature>.spec.md`
+- [ ] ADR written if architectural decision was made
+- [ ] Threat model updated in `THREAT_MODEL.md`
+- [ ] Tests written and confirmed failing (`cargo nextest run`)
+- [ ] Implementation written
+- [ ] All tests passing
+- [ ] `cargo clippy -- -D warnings` clean
+- [ ] `cargo audit` clean
+- [ ] Rustdoc on all public items
+- [ ] CHANGELOG.md updated
+
+---
+
+## Roadmap
+
+See `docs/roadmap/` for phase-by-phase plans, scope, and gate checklists.
+
+| Phase | File | Status |
+|-------|------|--------|
+| Phase 0 — Prior Art Analysis | [phase-0-prior-art.md](docs/roadmap/phase-0-prior-art.md) | TODO |
+| Phase 1 — Core Domain Model | [phase-1-core-domain.md](docs/roadmap/phase-1-core-domain.md) | TODO |
+| Phase 2 — REST API + AuthN/AuthZ | [phase-2-api-auth.md](docs/roadmap/phase-2-api-auth.md) | TODO |
+| Phase 3 — BOM Management | [phase-3-bom.md](docs/roadmap/phase-3-bom.md) | TODO |
+| Phase 4 — ECO/ECR Workflow Engine | [phase-4-eco-ecr.md](docs/roadmap/phase-4-eco-ecr.md) | TODO |
+| Phase 5 — UI (htmx) | [phase-5-ui.md](docs/roadmap/phase-5-ui.md) | TODO |
+
+**Start with Phase 0.** Do not write code or specs before Phase 0 is complete.
+
+---
+
+## Specifications
+
+Master index: [`SPEC.md`](SPEC.md)
+Template: [`docs/specs/TEMPLATE.spec.md`](docs/specs/TEMPLATE.spec.md)
+
+All specs use the mandatory format defined in the template. Acceptance criteria IDs in specs
+map 1:1 to test function names.
+
+---
+
+## Architecture Decision Records
+
+All significant decisions are documented in `docs/adr/`.
+Template: [`docs/adr/TEMPLATE.adr.md`](docs/adr/TEMPLATE.adr.md)
+
+First ADRs to write (Phase 0 output):
+
+| ADR | File |
+|-----|------|
+| ADR-001: Choice of Rust | [ADR-001-rust.md](docs/adr/ADR-001-rust.md) |
+| ADR-002: Choice of sqlx over Diesel | [ADR-002-sqlx.md](docs/adr/ADR-002-sqlx.md) |
+| ADR-003: Revision scheme design | [ADR-003-revision-scheme.md](docs/adr/ADR-003-revision-scheme.md) |
+| ADR-004: Lifecycle state machine approach | [ADR-004-lifecycle-state-machine.md](docs/adr/ADR-004-lifecycle-state-machine.md) |
+| ADR-005: MIT license rationale | [ADR-005-mit-license.md](docs/adr/ADR-005-mit-license.md) |
+| ADR-006: melange + apko over Dockerfile | [ADR-006-melange-apko.md](docs/adr/ADR-006-melange-apko.md) |
+
+---
+
+## Testing Policy
+
+Derived from DO-178C principles, adapted for tooling software.
+
+| Test Type | Location | Requirement |
+|-----------|----------|-------------|
+| Unit | `src/**/tests` | Every domain invariant |
+| Integration | `tests/integration/` | Every acceptance criterion |
+| Regression | CI on every PR | All of the above |
+| Security | `cargo-audit` + manual | Every phase boundary |
+
+- Tests are written **before** implementation (TDD, not test-after)
+- Acceptance criteria IDs in spec map 1:1 to test names
+- No `#[allow(dead_code)]` without documented justification
+- Coverage tracked but not used as sole quality gate — coverage of wrong behaviour is worthless
+
+---
+
+## Security Policy
+
+- `THREAT_MODEL.md` updated at every phase boundary
+- Threat model format: STRIDE per component
+- `cargo-audit` blocks CI on any RUSTSEC advisory
+- Dependency updates reviewed weekly
+- No `unsafe` without documented justification and review
+- **Container images built exclusively with melange + apko**
+  - melange builds reproducible APKs from source
+  - apko assembles OCI image from APK set — no Dockerfile, no shell in runtime image
+  - Zero unknown binaries in image; every component has a declared APK origin
+  - apko generates image SBOM on every build
+  - grype CVE scan against produced image in CI, blocking on HIGH/CRITICAL
+
+---
+
+## CI / Actions
+
+**Runners:** Self-hosted on Forgejo, AMD64 + ARM64.
+Builds are run on both architectures. Multi-arch OCI images produced via apko on every merge to main.
+
+**Actions defined in `.forgejo/workflows/`:**
+
+| Workflow | Trigger | Purpose |
+|---|---|---|
+| `ci.yaml` | PR, push to main | cargo test, clippy, audit |
+| `image.yaml` | push to main | melange + apko build + grype scan |
+| `mirror.yaml` | push to main | push to GitHub read-only mirror |
+| `milestone-sync.yaml` | PR merged to main | parse roadmap markdown, sync Forgejo milestones via API |
+
+`milestone-sync.yaml` spec: [`docs/specs/ci-milestone-sync.spec.md`](docs/specs/ci-milestone-sync.spec.md)
+
+---
+
+## Git / Branching Conventions
+
+### Branch hierarchy
+
+```
+main                           # stable; never broken
+└── <type>/<name>              # one branch per unit of work
+    └── <type>/<name>--<change># one sub-branch per discrete change
+```
+
+`<type>` is any Conventional Commits prefix: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `spec`. The discipline applies equally to all of them — not just features.
+
+Note: Git does not allow a branch and its own path-prefix to coexist, so sub-branches use `--` as separator rather than `/` (e.g. `feat/phase-0--openplm-analysis`, not `feat/phase-0/openplm-analysis`).
+
+### Commit discipline
+
+- **One commit per logical change.** A logical change is a single file, a single concept, or a single reason to change. Batching unrelated edits into one commit is not acceptable.
+- Commits on sub-branches may leave the project in a broken state — that is fine.
+- Before merging a sub-branch back to its feature branch, all tests must pass.
+- Before merging a feature branch to `main`, the feature must be complete and all tests must pass.
+
+### Context isolation
+
+Each feature is started with a fresh context. Do not carry assumptions or state from a previous feature session. Rely on CLAUDE.md, specs, ADRs, and test output — not on memory of prior conversations.
+
+### Commit format
+
+```
+Branches:   main (stable), feat/<name>, fix/<name>, spec/<name>, chore/<name>
+Commits:    Conventional Commits (feat, fix, docs, test, refactor, chore)
+PRs:        Phase gate checklist must be complete before merge to main
+Tags:       Semver (v0.1.0), signed
+```
+
+Commit message example:
+```
+feat(domain): add lifecycle state machine for Item
+
+REQ-LIFECYCLE-001, REQ-LIFECYCLE-002
+ACC-LIFECYCLE-001 through ACC-LIFECYCLE-004 now passing
+```
+
+---
+
+## Definition of Done
+
+A feature is done when:
+
+1. Specification APPROVED in `docs/specs/`
+2. All acceptance criteria tests passing
+3. `cargo clippy -- -D warnings` clean
+4. `cargo audit` clean
+5. `cargo doc` generates without warnings
+6. CHANGELOG.md entry written
+7. THREAT_MODEL.md updated if attack surface changed
+8. PR reviewed and merged to main
+
+---
+
+## What This Is Not (Explicit Scope Exclusions for MVP)
+
+- Not a CAD integration (post-MVP)
+- Not an ERP/financial module
+- Not a cloud-only product (self-hostable is a requirement)
+- Not an open-core product — ever
