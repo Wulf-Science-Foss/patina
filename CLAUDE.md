@@ -209,10 +209,35 @@ Builds are run on both architectures. Multi-arch OCI images produced via apko on
 
 ## Git / Branching Conventions
 
+### Branch hierarchy
+
 ```
-Branches:   main (stable), feat/<name>, fix/<name>, spec/<name>
+main                          # stable; never broken
+└── feat/<name>               # one branch per feature
+    └── feat/<name>--<change> # one sub-branch per discrete change
+```
+
+Also: `fix/<name>`, `spec/<name>`, `chore/<name>` at the feature level, with `--<change>` sub-branches.
+
+Note: Git does not allow a branch and its own path-prefix to coexist, so sub-branches use `--` as separator rather than `/` (e.g. `feat/phase-0--openplm-analysis`, not `feat/phase-0/openplm-analysis`).
+
+### Commit discipline
+
+- **One commit per logical change.** A logical change is a single file, a single concept, or a single reason to change. Batching unrelated edits into one commit is not acceptable.
+- Commits on sub-branches may leave the project in a broken state — that is fine.
+- Before merging a sub-branch back to its feature branch, all tests must pass.
+- Before merging a feature branch to `main`, the feature must be complete and all tests must pass.
+
+### Context isolation
+
+Each feature is started with a fresh context. Do not carry assumptions or state from a previous feature session. Rely on CLAUDE.md, specs, ADRs, and test output — not on memory of prior conversations.
+
+### Commit format
+
+```
+Branches:   main (stable), feat/<name>, fix/<name>, spec/<name>, chore/<name>
 Commits:    Conventional Commits (feat, fix, docs, test, refactor, chore)
-PRs:        Phase gate checklist must be complete before merge
+PRs:        Phase gate checklist must be complete before merge to main
 Tags:       Semver (v0.1.0), signed
 ```
 
