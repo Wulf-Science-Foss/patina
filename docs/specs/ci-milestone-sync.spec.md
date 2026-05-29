@@ -1,46 +1,64 @@
 # Specification: CI Milestone Sync
-Version: 0.1.0
+Version: 0.2.0
 Status: DRAFT
 
 ## Purpose
 
-Defines the `milestone-sync.yaml` Forgejo Actions workflow that parses phase gate
-checklists from merged PR bodies and synchronises Forgejo milestones via the REST API.
+Defines the `milestone-sync.yaml` Forgejo Actions workflow and its backing script
+`scripts/milestone-sync.sh`. Together they keep Forgejo milestones in sync with the
+phase gate checklists in `docs/roadmap/phase-*.md`.
+
+The roadmap files are the single source of truth. The script is idempotent: running it
+multiple times produces the same result. Milestones are never managed manually.
 
 ## Requirements
 
-REQ-CI-001: The workflow SHALL parse the phase gate checklist from a merged PR body.
-REQ-CI-002: The workflow SHALL call the Forgejo API to update milestone progress.
-REQ-CI-003: The workflow SHALL auto-close a milestone when all checklist items are checked.
-REQ-CI-004: The workflow SHALL auto-create the next phase milestone on closure.
-REQ-CI-005: The workflow SHALL post a milestone progress summary as a PR comment.
+REQ-CI-001: The script SHALL read checklist state from `docs/roadmap/phase-*.md`, not from PR bodies.
+REQ-CI-002: The script SHALL create a Forgejo milestone for each phase that has a checklist.
+REQ-CI-003: The script SHALL set each milestone's description to reflect checked/total item count.
+REQ-CI-004: The script SHALL close a milestone whose checklist is fully checked.
+REQ-CI-005: The script SHALL reopen a milestone whose checklist is no longer fully checked.
+REQ-CI-006: The script SHALL post a summary comment when invoked with --pr-number.
+REQ-CI-007: The workflow SHALL invoke the script on every PR merged to main.
 
 ## Data Model
 
-Inputs: PR body (markdown), Forgejo API token, repo owner/name.
-Forgejo API: `GET/POST/PATCH /api/v1/repos/{owner}/{repo}/milestones`
+Source of truth: `docs/roadmap/phase-N-*.md`, section `## Phase Gate Checklist`.
+Checklist items: lines matching `^\s*- \[[ x]\]`.
+Milestone title: the `# Phase N — ...` heading from the same file.
+
+Forgejo API used:
+- `GET  /api/v1/repos/{owner}/{repo}/milestones?state=all`
+- `POST /api/v1/repos/{owner}/{repo}/milestones`
+- `PATCH /api/v1/repos/{owner}/{repo}/milestones/{id}`
+- `POST /api/v1/repos/{owner}/{repo}/issues/{index}/comments`
 
 ## Behaviour
 
-1. Trigger: PR merged to main
-2. Parse checklist items from PR body
-3. Determine current phase milestone
-4. Calculate checked / total
-5. PATCH milestone with updated progress
-6. If all checked → close milestone, create next
-7. POST PR comment with summary
+1. Load credentials from environment (CI) or `.env` (local).
+2. Fetch all existing milestones (open and closed).
+3. For each `docs/roadmap/phase-*.md` in sorted order:
+   a. Extract title from the `# Phase N — ...` heading.
+   b. Count total and checked items in `## Phase Gate Checklist`.
+   c. Skip the file if it has no checklist items.
+   d. Find the matching Forgejo milestone by title; create it if absent.
+   e. PATCH description and state to match checklist reality.
+4. If `--pr-number N` was passed, post a full progress summary comment.
 
 ## Acceptance Criteria
 
-ACC-CI-001: Given a PR with all checklist items checked, when merged, the milestone is closed.
-ACC-CI-002: Given a PR with partial checklist, when merged, milestone progress is updated.
-ACC-CI-003: Given milestone closure, the next phase milestone is created automatically.
-ACC-CI-004: Given any merge, a progress comment is posted to the PR.
+ACC-CI-001: A phase with all items checked results in a closed milestone.
+ACC-CI-002: A phase with partial items checked results in an open milestone with correct description.
+ACC-CI-003: A phase milestone missing from Forgejo is created automatically.
+ACC-CI-004: A closed milestone whose checklist is un-checked is reopened.
+ACC-CI-005: Running the script twice produces no additional changes (idempotent).
+ACC-CI-006: A PR comment is posted when --pr-number is supplied.
 
 ## Out of Scope
 
 - Manual milestone management
-- Non-phase-gate PR bodies
+- Parsing checklist state from PR bodies
+- Milestones for non-phase work (bugs, chores)
 
 ## References
 
