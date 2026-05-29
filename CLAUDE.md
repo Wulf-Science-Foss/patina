@@ -9,6 +9,13 @@ Reference standard for process discipline: DO-178C (adapted for software tooling
 
 ---
 
+## Instructions for Claude
+
+- **Do not use the auto-memory system.** Do not write to `~/.claude/` or any path outside this repository. CLAUDE.md and files in this repo are the only source of truth. Context contamination via hidden memory files is not acceptable.
+- **Always create the correct branch structure before committing.** Create `<type>/<name>` feature branch and `<type>/<name>--<change>` sub-branches. Never commit directly to `main`.
+
+---
+
 ## Core Principles
 
 - **MIT License** — permissive, no exceptions
