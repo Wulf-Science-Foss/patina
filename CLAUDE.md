@@ -51,7 +51,7 @@ GitHub issues disabled to avoid split community.
 
 ---
 
-
+## Repository Structure
 
 ```
 patina/
@@ -63,8 +63,9 @@ patina/
 ├── Cargo.toml
 ├── Cargo.lock              # Committed (binary crate)
 ├── assets/
-│   ├── images/             # Logos and other images
+│   └── images/             # Logos and other images
 ├── docs/
+│   ├── roadmap/            # Phase-by-phase plans and gate checklists
 │   ├── specs/              # Per-feature specifications (*.spec.md)
 │   ├── adr/                # Architecture Decision Records
 │   └── prior-art/          # Prior art analysis documents
@@ -109,163 +110,48 @@ PRIOR ART → SPEC → THREAT MODEL → TESTS (failing) → IMPLEMENTATION → T
 
 ---
 
-## Phase 0 — Prior Art Analysis (START HERE)
+## Roadmap
 
-Complete before writing any code or specs.
+See `docs/roadmap/` for phase-by-phase plans, scope, and gate checklists.
 
-### 0.1 OpenPLM Schema Analysis
+| Phase | File | Status |
+|-------|------|--------|
+| Phase 0 — Prior Art Analysis | [phase-0-prior-art.md](docs/roadmap/phase-0-prior-art.md) | TODO |
+| Phase 1 — Core Domain Model | [phase-1-core-domain.md](docs/roadmap/phase-1-core-domain.md) | TODO |
+| Phase 2 — REST API + AuthN/AuthZ | [phase-2-api-auth.md](docs/roadmap/phase-2-api-auth.md) | TODO |
+| Phase 3 — BOM Management | [phase-3-bom.md](docs/roadmap/phase-3-bom.md) | TODO |
+| Phase 4 — ECO/ECR Workflow Engine | [phase-4-eco-ecr.md](docs/roadmap/phase-4-eco-ecr.md) | TODO |
+| Phase 5 — UI (htmx) | [phase-5-ui.md](docs/roadmap/phase-5-ui.md) | TODO |
 
-- [ ] Clone https://github.com/openplm/openplm
-- [ ] Extract and document full database schema to `docs/prior-art/openplm-schema.md`
-- [ ] Identify: part/document model, revision scheme, lifecycle states, BOM structure, ECO/ECR workflow tables
-- [ ] Identify: what to adopt, what to discard, what to improve
-- [ ] Document findings with rationale
-
-### 0.2 Aras Innovator Data Model
-
-- [ ] Install Aras Community Edition (VM/container)
-- [ ] Document core ItemType schema to `docs/prior-art/aras-schema.md`
-- [ ] Focus: relationship model, versioning approach, lifecycle engine
-- [ ] Note: do NOT copy any Aras code — schema observation only
-
-### 0.3 FreeCAD PDM Discussion Review
-
-- [ ] Review FreeCAD forum PDM/PLM threads
-- [ ] Document: user pain points, desired features, integration expectations
-- [ ] File: `docs/prior-art/freecad-community-needs.md`
-- [ ] This defines the early adopter target persona
-
-### 0.4 Teamcenter Feature Baseline
-
-- [ ] Document core Teamcenter capabilities to `docs/prior-art/teamcenter-baseline.md`
-- [ ] Categorise each: MVP / Post-MVP / Out-of-scope
-- [ ] Sources: public documentation, ISO 10303 (STEP), IEC 82045
-
-### 0.5 Prior Art Summary
-
-- [ ] Write `docs/prior-art/SUMMARY.md` synthesising all above
-- [ ] Define the initial domain vocabulary (ubiquitous language)
-- [ ] Gate: do not proceed to Phase 1 until summary is reviewed and committed
+**Start with Phase 0.** Do not write code or specs before Phase 0 is complete.
 
 ---
 
-## Phase 1 — Core Domain Model
+## Specifications
 
-### Scope
+Master index: [`SPEC.md`](SPEC.md)
+Template: [`docs/specs/TEMPLATE.spec.md`](docs/specs/TEMPLATE.spec.md)
 
-Revision-controlled items with lifecycle states. No UI. No BOM. No workflow engine yet.
-
-### Specifications Required
-
-- `docs/specs/item.spec.md` — Part and Document item model
-- `docs/specs/revision.spec.md` — Revision scheme (alphabetic/numeric, branching rules)
-- `docs/specs/lifecycle.spec.md` — Lifecycle state machine (states, transitions, guards)
-- `docs/specs/identity.spec.md` — Item numbering and identity rules
-
-### Spec Format (mandatory for every spec)
-
-```markdown
-# Specification: <Feature Name>
-Version: 0.1.0
-Status: DRAFT | REVIEW | APPROVED | SUPERSEDED
-
-## Purpose
-One paragraph.
-
-## Requirements
-REQ-XXX-001: <shall statement>
-REQ-XXX-002: <shall statement>
-
-## Data Model
-(ERD or field table)
-
-## Behaviour
-(State machine, sequence diagram, or invariant table)
-
-## Acceptance Criteria
-ACC-XXX-001: Given / When / Then
-ACC-XXX-002: Given / When / Then
-
-## Out of Scope
-Explicit exclusions.
-
-## References
-- Prior art docs
-- Standards (ISO, IEC, IEEE)
-```
-
-### Implementation Order
-
-1. Domain types (`src/domain/`) — pure Rust, no DB dependency
-2. Database migrations (`migrations/`)
-3. Repository layer (`src/db/`)
-4. Integration tests (`tests/integration/`)
-
-### Phase 1 Exit Criteria
-
-- All acceptance criteria tests passing
-- `cargo audit` clean
-- No clippy warnings
-- Schema documented and stable
+All specs use the mandatory format defined in the template. Acceptance criteria IDs in specs
+map 1:1 to test function names.
 
 ---
 
-## Phase 2 — REST API + AuthN/AuthZ
+## Architecture Decision Records
 
-### Scope
+All significant decisions are documented in `docs/adr/`.
+Template: [`docs/adr/TEMPLATE.adr.md`](docs/adr/TEMPLATE.adr.md)
 
-HTTP API over Phase 1 domain. RBAC. JWT. OpenAPI spec generated from code.
+First ADRs to write (Phase 0 output):
 
-### Specifications Required
-
-- `docs/specs/api.spec.md` — Endpoint catalogue, HTTP semantics, error schema
-- `docs/specs/auth.spec.md` — AuthN flow, RBAC roles and permissions matrix
-- `docs/specs/audit-log.spec.md` — Immutable audit trail requirements
-
-### Security Requirements (non-negotiable)
-
-- OWASP API Security Top 10 addressed per endpoint in `THREAT_MODEL.md`
-- No secrets in code or logs
-- All inputs validated at API boundary
-- Rate limiting on auth endpoints
-- `cargo-audit` in CI blocking
-
----
-
-## Phase 3 — BOM Management
-
-### Scope
-
-Single-level and multi-level BOM. Where-used. BOM comparison across revisions.
-
-### Specifications Required
-
-- `docs/specs/bom.spec.md`
-- `docs/specs/where-used.spec.md`
-- `docs/specs/bom-compare.spec.md`
-
----
-
-## Phase 4 — ECO/ECR Workflow Engine
-
-### Scope
-
-Engineering Change Order / Request lifecycle. Approvals. Affected item tracking.
-
-### Specifications Required
-
-- `docs/specs/eco.spec.md`
-- `docs/specs/ecr.spec.md`
-- `docs/specs/approval-workflow.spec.md`
-
----
-
-## Phase 5 — UI (htmx)
-
-### Scope
-
-Minimal, functional web UI. No SPA. Server-side rendering.
-UI is a client of the Phase 2 API — no business logic in templates.
+| ADR | File |
+|-----|------|
+| ADR-001: Choice of Rust | [ADR-001-rust.md](docs/adr/ADR-001-rust.md) |
+| ADR-002: Choice of sqlx over Diesel | [ADR-002-sqlx.md](docs/adr/ADR-002-sqlx.md) |
+| ADR-003: Revision scheme design | [ADR-003-revision-scheme.md](docs/adr/ADR-003-revision-scheme.md) |
+| ADR-004: Lifecycle state machine approach | [ADR-004-lifecycle-state-machine.md](docs/adr/ADR-004-lifecycle-state-machine.md) |
+| ADR-005: MIT license rationale | [ADR-005-mit-license.md](docs/adr/ADR-005-mit-license.md) |
+| ADR-006: melange + apko over Dockerfile | [ADR-006-melange-apko.md](docs/adr/ADR-006-melange-apko.md) |
 
 ---
 
@@ -284,31 +170,6 @@ Derived from DO-178C principles, adapted for tooling software.
 - Acceptance criteria IDs in spec map 1:1 to test names
 - No `#[allow(dead_code)]` without documented justification
 - Coverage tracked but not used as sole quality gate — coverage of wrong behaviour is worthless
-
----
-
-## Architecture Decision Records
-
-All significant decisions documented in `docs/adr/` using this format:
-
-```markdown
-# ADR-NNN: <Title>
-Date: YYYY-MM-DD
-Status: PROPOSED | ACCEPTED | SUPERSEDED by ADR-NNN
-
-## Context
-## Decision
-## Consequences
-## Alternatives Considered
-```
-
-First ADRs to write (Phase 0 output):
-- ADR-001: Choice of Rust
-- ADR-002: Choice of sqlx over Diesel
-- ADR-003: Revision scheme design
-- ADR-004: Lifecycle state machine approach
-- ADR-005: MIT license rationale
-- ADR-006: melange + apko over Dockerfile for container images
 
 ---
 
@@ -342,16 +203,11 @@ Builds are run on both architectures. Multi-arch OCI images produced via apko on
 | `mirror.yaml` | push to main | push to GitHub read-only mirror |
 | `milestone-sync.yaml` | PR merged to main | parse roadmap markdown, sync Forgejo milestones via API |
 
-`milestone-sync.yaml` spec: `docs/specs/ci-milestone-sync.spec.md`
-- Parses phase gate checklist from merged PR body
-- Calls Forgejo REST API (`/api/v1/repos/{owner}/{repo}/milestones`) to update progress
-- Auto-closes milestone when all phase gate items checked
-- Auto-creates next phase milestone on closure
-- Posts milestone progress summary as PR comment
+`milestone-sync.yaml` spec: [`docs/specs/ci-milestone-sync.spec.md`](docs/specs/ci-milestone-sync.spec.md)
 
 ---
 
-
+## Git / Branching Conventions
 
 ```
 Branches:   main (stable), feat/<name>, fix/<name>, spec/<name>
@@ -388,6 +244,6 @@ A feature is done when:
 ## What This Is Not (Explicit Scope Exclusions for MVP)
 
 - Not a CAD integration (post-MVP)
-- Not a ERP/financial module
+- Not an ERP/financial module
 - Not a cloud-only product (self-hostable is a requirement)
 - Not an open-core product — ever
