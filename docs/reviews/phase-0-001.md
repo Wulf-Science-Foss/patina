@@ -5,7 +5,7 @@
 **Reviewing model:** Claude Opus 4.8
 **Command:** `/code-review high`
 **Date:** 2026-05-30
-**Status:** OPEN — awaiting author fixes
+**Status:** RESOLVED — awaiting re-review (round 002)
 
 ---
 
@@ -33,7 +33,9 @@ defines `keyed_name` as the human-readable name, and the stable
 cross-generation anchor in Aras is `config_id`. The summary contradicts its
 own source document. The correct equivalent is `config_id`.
 
-**Resolution:** _(author to fill)_
+**Resolution:** Fixed in branch `docs/phase-0--fix-f001`. Changed "Aras
+*keyed_name*" to "Aras *config_id* (the stable cross-generation anchor)" in
+the vocabulary table.
 
 ---
 
@@ -57,7 +59,11 @@ Revisions are created during work and *released* later. The definition
 should reflect that an ItemRevision exists from creation in a draft/In Work
 state and is released by a later state transition.
 
-**Resolution:** _(author to fill)_
+**Resolution:** Fixed in branch `docs/phase-0--fix-f002`. Rewrote the
+vocabulary definition: ItemRevision is now described as created during
+development (starting in the first lifecycle state, typically In Work), with
+reaching Released being a state transition on the existing object, not the
+creation event.
 
 ---
 
@@ -71,7 +77,8 @@ management — customer satisfaction / complaints handling), so this is a
 substantive factual error in a standards claim, not a cosmetic slip. Every
 other reference in the corpus correctly says 10303.
 
-**Resolution:** _(author to fill)_
+**Resolution:** Fixed in branch `docs/phase-0--fix-f003`. "ISO 10003" →
+"ISO 10303" in the cross-system findings section.
 
 ---
 
@@ -84,7 +91,11 @@ established fact, but Open Question 5 treats per-type-vs-shared lifecycle as
 unresolved. Either soften the vocabulary entry to not pre-empt the open
 question, or close the open question.
 
-**Resolution:** _(author to fill)_
+**Resolution:** Fixed in branch `docs/phase-0--fix-f004`. The distinction
+is that the *mechanism* (configurable per item type) is settled, while the
+*default configuration* for Part vs Document is the open question. Vocabulary
+entry now states both halves explicitly. OQ-5 reworded to clarify it asks
+only about the default, not the mechanism.
 
 ---
 
@@ -99,7 +110,9 @@ types." Clarify that format validation lives in the domain layer, with the
 database constraint as a later defence-in-depth layer — or adjust the scope
 statement.
 
-**Resolution:** _(author to fill)_
+**Resolution:** Fixed in branch `docs/phase-0--fix-f005`. Both occurrences
+updated: validation is "in the domain layer (Phase 1), with a database-level
+constraint as defence-in-depth (Phase 2+)".
 
 ---
 
@@ -112,7 +125,10 @@ defer) but left **medium** undefined and did not state the severity scale.
 This is being addressed directly in the CLAUDE.md Review Policy update that
 accompanies this review.
 
-**Resolution:** _(author to fill)_
+**Resolution:** Fixed by the reviewing model (Opus) as part of the same
+review pass: a severity disposition table (High/Critical, Medium, Low) was
+added to the Review Policy section in `CLAUDE.md` in branch
+`docs/phase-0--review-loop`. No further author action required.
 
 ---
 
@@ -132,6 +148,6 @@ re-raise this.
 
 ## Sign-off
 
-- [ ] All HIGH findings resolved
-- [ ] All MEDIUM findings resolved or deferred with rationale
-- [ ] Re-review round opened to confirm fixes
+- [x] All HIGH findings resolved
+- [x] All MEDIUM findings resolved or deferred with rationale
+- [ ] Re-review round opened to confirm fixes (round 002 pending)
