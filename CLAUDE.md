@@ -105,6 +105,11 @@ PRIOR ART → SPEC → THREAT MODEL → TESTS (failing) → IMPLEMENTATION → T
 
 ### Phase Gate Checklist (per feature)
 
+These boxes are **checked off automatically** when the PR merges to `main`
+(see [CI / Actions](#ci--actions)). Do not tick them manually during
+development — an unchecked checklist on an open branch is the correct,
+expected state.
+
 - [ ] Prior art documented in `docs/prior-art/<feature>.md`
 - [ ] Specification written in `docs/specs/<feature>.spec.md`
 - [ ] ADR written if architectural decision was made
@@ -211,8 +216,14 @@ Builds are run on both architectures. Multi-arch OCI images produced via apko on
 | `ci.yaml` | PR, push to main | cargo test, clippy, audit |
 | `image.yaml` | push to main | melange + apko build + grype scan |
 | `milestone-sync.yaml` | PR merged to main | parse roadmap markdown, sync Forgejo milestones via API |
+| `gate-checkoff.yaml` | PR merged to main | tick the phase gate checklist and flip phase/spec status flags for the merged feature |
 
 `milestone-sync.yaml` spec: [`docs/specs/ci-milestone-sync.spec.md`](docs/specs/ci-milestone-sync.spec.md)
+
+`gate-checkoff.yaml` is the single authority for marking work done: phase
+gate checkboxes, the roadmap Status column, and spec Status flags are
+flipped by this workflow on merge to `main` — never by hand. Spec to be
+written (`docs/specs/ci-gate-checkoff.spec.md`).
 
 ---
 
@@ -267,22 +278,38 @@ running from a **fresh context with no knowledge of the current session**.
 The purpose is independent verification: the reviewer should be able to
 identify gaps, inconsistencies, and mistakes that the author cannot see.
 
-### How to run a review
+### The review loop
 
-```
-/code-review high
-```
+The review is an iterative loop between two models. The reviewing model
+**must differ from the model that authored the work** — independent
+perspective is the point.
 
-Run this command on the feature branch before opening the PR. The reviewing
-model **must differ from the model that authored the work** — independent
-perspective is the point. Current convention:
+1. **Author (model A)** completes the work on the feature branch.
+2. **Switch model**: `/model opus` (if Sonnet authored) or `/model sonnet`
+   (if Opus authored).
+3. **Review (model B)** runs `/code-review high` on the feature branch.
+4. **Record, do not fix.** Model B writes every finding to a review document
+   at `docs/reviews/<feature>-NNN.md`, where `NNN` is the review round
+   (`001`, `002`, …). The reviewer never fixes findings — recording and
+   fixing must be done by different models for the independence to hold.
+5. **Switch back** to the authoring model (model A).
+6. **Fix (model A)** resolves each finding and fills in its **Resolution**
+   field in the review doc (commit reference or deferral rationale).
+7. **Repeat** from step 2 with a new round (`NNN+1`) until a review round
+   produces no HIGH or MEDIUM findings.
 
-| Authoring model | Review model |
-|-----------------|--------------|
-| Claude Sonnet (default) | Switch to Opus: `/model opus`, then `/code-review high` |
-| Claude Opus | Switch to Sonnet: `/model sonnet`, then `/code-review high` |
+Only when a round is clean may the PR be opened. The latest review doc must
+be referenced in the PR description.
 
-Switch back to the authoring model after the review is complete.
+### Severity handling
+
+`/code-review` ranks findings by severity. Disposition:
+
+| Severity | Disposition |
+|----------|-------------|
+| **High / Critical** | Must fix before PR. |
+| **Medium** | Must fix, or explicitly defer with rationale recorded in the review doc. |
+| **Low** | May defer; record as an open question or note. |
 
 ### Review scope
 
@@ -299,12 +326,14 @@ The review agent must check:
 - **Scope**: does anything in the diff violate the Definition of Done or
   reach into a phase that has not yet been gated?
 
-### Review findings
+### Review documents
 
-All findings rated **high** or above must be addressed before the PR is
-opened. Findings rated **low** may be recorded as open questions or deferred
-with documented rationale. The review output must be summarised in the PR
-description.
+Review findings live in `docs/reviews/`, one document per review round,
+named `<feature>-NNN.md`. Each finding records location, severity,
+description, and a Resolution field the author fills in. Dismissed findings
+are recorded too (with rationale) so later rounds do not re-raise them.
+Review documents are committed — they are the audit trail for the review
+gate, as required by the standards in `docs/prior-art/standards.md`.
 
 ---
 
