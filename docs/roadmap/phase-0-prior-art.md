@@ -42,10 +42,19 @@ Output: [`docs/prior-art/teamcenter-baseline.md`](../prior-art/teamcenter-baseli
 - [ ] Categorise each: MVP / Post-MVP / Out-of-scope
 - [ ] Sources: public documentation, ISO 10303 (STEP), IEC 82045
 
-## 0.5 Prior Art Summary
+## 0.5 Standards Analysis
+
+Output: [`docs/prior-art/standards.md`](../prior-art/standards.md)
+
+- [ ] Document each relevant standard: scope, key requirements, and implications for Patina
+- [ ] Standards to cover: ISO 10007:2017, IEEE 828-2012, IEC 82045, CMII (ICMM), ISO 10303 AP242 (STEP), ISO 8000
+- [ ] For each standard, identify: rules that constrain Patina's design, rules we adopt, and intentional deviations with rationale
+- [ ] Note: ITIL excluded — IT service management, wrong domain
+
+## 0.6 Prior Art Summary
 
 Output: [`docs/prior-art/SUMMARY.md`](../prior-art/SUMMARY.md)
 
-- [ ] Synthesise all four analyses above
+- [ ] Synthesise all five analyses above (0.1–0.5)
 - [ ] Define the initial domain vocabulary (ubiquitous language)
 - [ ] **Gate:** do not proceed to Phase 1 until this is reviewed and committed
