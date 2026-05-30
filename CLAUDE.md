@@ -270,12 +270,19 @@ identify gaps, inconsistencies, and mistakes that the author cannot see.
 ### How to run a review
 
 ```
-/code-review ultra
+/code-review high
 ```
 
-Run this command on the feature branch before opening the PR. It spawns
-multiple cloud agents in parallel (using Opus) that review the full diff
-from a clean slate. Findings are returned as a structured report.
+Run this command on the feature branch before opening the PR. The reviewing
+model **must differ from the model that authored the work** — independent
+perspective is the point. Current convention:
+
+| Authoring model | Review model |
+|-----------------|--------------|
+| Claude Sonnet (default) | Switch to Opus: `/model opus`, then `/code-review high` |
+| Claude Opus | Switch to Sonnet: `/model sonnet`, then `/code-review high` |
+
+Switch back to the authoring model after the review is complete.
 
 ### Review scope
 
@@ -312,7 +319,7 @@ A feature is done when:
 5. `cargo doc` generates without warnings
 6. CHANGELOG.md entry written
 7. THREAT_MODEL.md updated if attack surface changed
-8. Review agent run (`/code-review ultra`); high findings addressed
+8. Review agent run (`/code-review high`) with a different model than the author; high findings addressed
 9. PR reviewed and merged to main
 
 ---
