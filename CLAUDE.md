@@ -100,7 +100,7 @@ patina/
 Every feature MUST follow this sequence. No exceptions.
 
 ```
-PRIOR ART → SPEC → THREAT MODEL → TESTS (failing) → IMPLEMENTATION → TESTS (passing) → DOCS
+PRIOR ART → SPEC → THREAT MODEL → TESTS (failing) → IMPLEMENTATION → TESTS (passing) → DOCS → REVIEW → PR
 ```
 
 ### Phase Gate Checklist (per feature)
@@ -116,6 +116,7 @@ PRIOR ART → SPEC → THREAT MODEL → TESTS (failing) → IMPLEMENTATION → T
 - [ ] `cargo audit` clean
 - [ ] Rustdoc on all public items
 - [ ] CHANGELOG.md updated
+- [ ] Review agent run on feature branch; all findings addressed (see [Review Policy](#review-policy))
 
 ---
 
@@ -259,6 +260,47 @@ ACC-LIFECYCLE-001 through ACC-LIFECYCLE-004 now passing
 
 ---
 
+## Review Policy
+
+Before a PR is opened, the feature branch must be reviewed by a review agent
+running from a **fresh context with no knowledge of the current session**.
+The purpose is independent verification: the reviewer should be able to
+identify gaps, inconsistencies, and mistakes that the author cannot see.
+
+### How to run a review
+
+```
+/code-review ultra
+```
+
+Run this command on the feature branch before opening the PR. It spawns
+multiple cloud agents in parallel (using Opus) that review the full diff
+from a clean slate. Findings are returned as a structured report.
+
+### Review scope
+
+The review agent must check:
+
+- **Correctness**: do the changes do what they claim? Are there factual
+  errors, contradictions, or gaps?
+- **Completeness**: does the work satisfy the phase gate checklist? Are any
+  required documents missing or left as stubs?
+- **Consistency**: do the documents agree with each other? Do specs, ADRs,
+  and prior art findings align?
+- **Standards compliance**: does the work respect the standards documented
+  in `docs/prior-art/standards.md`?
+- **Scope**: does anything in the diff violate the Definition of Done or
+  reach into a phase that has not yet been gated?
+
+### Review findings
+
+All findings rated **high** or above must be addressed before the PR is
+opened. Findings rated **low** may be recorded as open questions or deferred
+with documented rationale. The review output must be summarised in the PR
+description.
+
+---
+
 ## Definition of Done
 
 A feature is done when:
@@ -270,7 +312,8 @@ A feature is done when:
 5. `cargo doc` generates without warnings
 6. CHANGELOG.md entry written
 7. THREAT_MODEL.md updated if attack surface changed
-8. PR reviewed and merged to main
+8. Review agent run (`/code-review ultra`); high findings addressed
+9. PR reviewed and merged to main
 
 ---
 
