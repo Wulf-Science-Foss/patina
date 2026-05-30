@@ -44,3 +44,4 @@ Spec template: [`docs/specs/TEMPLATE.spec.md`](docs/specs/TEMPLATE.spec.md)
 | Spec | File | Status |
 |------|------|--------|
 | Milestone sync CI action | [ci-milestone-sync.spec.md](docs/specs/ci-milestone-sync.spec.md) | DRAFT |
+| Gate check-off CI action | [ci-gate-checkoff.spec.md](docs/specs/ci-gate-checkoff.spec.md) | APPROVED |

@@ -16,5 +16,6 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Spec stubs for all planned phases (Phase 1–4 + CI)
 - ADR stubs for foundational architectural decisions (ADR-001 through ADR-006)
 - Prior art analysis stubs for OpenPLM, Aras, FreeCAD community, Teamcenter
+- `gate-checkoff.yaml` CI workflow and `scripts/gate-checkoff.sh`: automatically ticks phase gate checklist boxes and flips status flags in roadmap files and CLAUDE.md when a feature branch merges to main (`docs/specs/ci-gate-checkoff.spec.md`)
 
 [Unreleased]: https://forgejo.wulf.science/WulfScience-FOSS/patina/compare/v0.0.0...HEAD
