@@ -5,7 +5,7 @@
 **Reviewing model:** Claude Opus 4.8
 **Command:** `/code-review high`
 **Date:** 2026-05-30
-**Status:** RESOLVED — awaiting re-review (round 002)
+**Status:** CLOSED — fixes confirmed by round 002 ([`phase-0-002.md`](phase-0-002.md))
 
 ---
 
@@ -150,4 +150,4 @@ re-raise this.
 
 - [x] All HIGH findings resolved
 - [x] All MEDIUM findings resolved or deferred with rationale
-- [ ] Re-review round opened to confirm fixes (round 002 pending)
+- [x] Re-review round opened to confirm fixes (round 002 — CLEAN)
