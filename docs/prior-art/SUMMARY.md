@@ -23,7 +23,7 @@ the prior-art system's term is noted in parentheses.
 |------|------------|
 | **Item** | A managed object representing a product, component, or document. An Item has a stable identity across all revisions. Equivalent to Teamcenter *Item*, Aras *Item* (with a part or document ItemType). |
 | **ItemRevision** | A formally versioned snapshot of an Item. Created when an Item is released. Identified by `item_number/revision` (e.g. `000123/A`). Equivalent to Teamcenter *ItemRevision*, openPLM *PLMObject at a given revision*. |
-| **item_number** | The stable, unique identifier for an Item. Never changes. Operator-configurable format; enforced by schema constraint. Equivalent to Teamcenter *Item ID*, Aras *keyed_name*. |
+| **item_number** | The stable, unique identifier for an Item. Never changes. Operator-configurable format; enforced by schema constraint. Equivalent to Teamcenter *Item ID*, Aras *config_id* (the stable cross-generation anchor). |
 | **revision** | The user-visible label for an ItemRevision. Alphabetic by default (A → B → C). Increments only on lifecycle release. Distinct from internal *version*. |
 | **version** | An internal, ever-incrementing counter on an ItemRevision that increments on every saved change. Not user-visible by default. Equivalent to Aras *generation*, Teamcenter *iteration/sequence*. |
 | **lifecycle** | A named, ordered sequence of states that an ItemRevision passes through. Configurable per item type. |
