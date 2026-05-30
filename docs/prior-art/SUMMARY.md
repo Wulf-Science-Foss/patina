@@ -23,7 +23,7 @@ the prior-art system's term is noted in parentheses.
 |------|------------|
 | **Item** | A managed object representing a product, component, or document. An Item has a stable identity across all revisions. Equivalent to Teamcenter *Item*, Aras *Item* (with a part or document ItemType). |
 | **ItemRevision** | A formally versioned snapshot of an Item. Created during development (starts in the first lifecycle state, typically In Work) and progresses through lifecycle states; reaching Released is a state transition on an existing ItemRevision, not the creation event. Identified by `item_number/revision` (e.g. `000123/A`). Equivalent to Teamcenter *ItemRevision*, openPLM *PLMObject at a given revision*. |
-| **item_number** | The stable, unique identifier for an Item. Never changes. Operator-configurable format; enforced by schema constraint. Equivalent to Teamcenter *Item ID*, Aras *config_id* (the stable cross-generation anchor). |
+| **item_number** | The stable, unique identifier for an Item. Never changes. Operator-configurable format; validated in the domain layer (Phase 1), with a database-level constraint as defence-in-depth (Phase 2+). Equivalent to Teamcenter *Item ID*, Aras *config_id* (the stable cross-generation anchor). |
 | **revision** | The user-visible label for an ItemRevision. Alphabetic by default (A → B → C). Increments only on lifecycle release. Distinct from internal *version*. |
 | **version** | An internal, ever-incrementing counter on an ItemRevision that increments on every saved change. Not user-visible by default. Equivalent to Aras *generation*, Teamcenter *iteration/sequence*. |
 | **lifecycle** | A named, ordered sequence of states that an ItemRevision passes through. The lifecycle mechanism is configurable; which lifecycle is assigned to each item type by default is an open question (see OQ-5). |
@@ -94,7 +94,7 @@ IEEE 828 (CR / CN), CMII (change request / Change Notice), and Teamcenter
 ISO 8000, ISO 10007, IEEE 828, and all practical systems require that CI
 identifiers are unique, stable, and syntactically controlled. Patina: the
 `item_number` format is operator-configurable with regex validation, enforced
-at the database level.
+in the domain layer with a database constraint as defence-in-depth.
 
 ### Common patterns to discard
 
