@@ -26,7 +26,7 @@ the prior-art system's term is noted in parentheses.
 | **item_number** | The stable, unique identifier for an Item. Never changes. Operator-configurable format; enforced by schema constraint. Equivalent to Teamcenter *Item ID*, Aras *config_id* (the stable cross-generation anchor). |
 | **revision** | The user-visible label for an ItemRevision. Alphabetic by default (A → B → C). Increments only on lifecycle release. Distinct from internal *version*. |
 | **version** | An internal, ever-incrementing counter on an ItemRevision that increments on every saved change. Not user-visible by default. Equivalent to Aras *generation*, Teamcenter *iteration/sequence*. |
-| **lifecycle** | A named, ordered sequence of states that an ItemRevision passes through. Configurable per item type. |
+| **lifecycle** | A named, ordered sequence of states that an ItemRevision passes through. The lifecycle mechanism is configurable; which lifecycle is assigned to each item type by default is an open question (see OQ-5). |
 | **state** | A named position in a lifecycle (e.g. In Work, Under Review, Released, Obsolete). An ItemRevision is always in exactly one state. |
 | **release** | The act of transitioning an ItemRevision to the `Released` state. Triggers: revision letter increment on the successor, BOM reference locking. |
 | **BOM** | Bill of Materials. A set of BOM lines describing the child components of an assembly ItemRevision. |
@@ -175,6 +175,8 @@ BOM (ParentChildLink), ECR/ECO, and vault are Phase 3/4 scope.
    from day one, or start with a fixed scheme (e.g. sequential numeric)?
    ADR to be written.
 
-5. **Document vs. Part lifecycle**: should Part and Document share one
-   configurable lifecycle, or should each have its own default? IEC 82045
-   implies a document-specific lifecycle; Teamcenter has per-type lifecycles.
+5. **Document vs. Part lifecycle default**: the lifecycle *mechanism* is
+   configurable per item type (settled). The open question is whether
+   Part and Document should ship with the *same* default lifecycle or
+   different defaults. IEC 82045 implies a document-specific lifecycle;
+   Teamcenter uses per-type lifecycles. ADR to be written.
