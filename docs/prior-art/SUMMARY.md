@@ -53,7 +53,7 @@ the prior-art system's term is noted in parentheses.
 Every system studied (Teamcenter, Aras, openPLM) separates the stable entity
 (Item, with a permanent identifier) from the versioned snapshot (ItemRevision,
 with a revision label). This is the right abstraction. The Item ID never
-changes; revision letters change on release. ISO 10003 AP242 (`product` /
+changes; revision letters change on release. ISO 10303 AP242 (`product` /
 `product_definition`) and IEEE 828 (CI / baseline) confirm the same split.
 
 **2. Revision label increments on lifecycle release, not on every save**
