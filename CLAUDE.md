@@ -131,7 +131,7 @@ See `docs/roadmap/` for phase-by-phase plans, scope, and gate checklists.
 
 | Phase | File | Status |
 |-------|------|--------|
-| Phase 0 — Prior Art Analysis | [phase-0-prior-art.md](docs/roadmap/phase-0-prior-art.md) | TODO |
+| Phase 0 — Prior Art Analysis | [phase-0-prior-art.md](docs/roadmap/phase-0-prior-art.md) | COMPLETE |
 | Phase 1 — Core Domain Model | [phase-1-core-domain.md](docs/roadmap/phase-1-core-domain.md) | TODO |
 | Phase 2 — REST API + AuthN/AuthZ | [phase-2-api-auth.md](docs/roadmap/phase-2-api-auth.md) | TODO |
 | Phase 3 — BOM Management | [phase-3-bom.md](docs/roadmap/phase-3-bom.md) | TODO |
