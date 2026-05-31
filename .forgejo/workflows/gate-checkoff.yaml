@@ -8,13 +8,18 @@ on:
 jobs:
   checkoff:
     if: ${{ github.event.pull_request.merged == true }}
-    runs-on: linux
+    runs-on: docker
+    container:
+      image: ${{ vars.CI_TOOLS_IMAGE }}:${{ vars.CI_TOOLS_IMAGE_TAG }}
 
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
           token: ${{ secrets.FORGEJO_TOKEN }}
+
+      - name: Prepare repo
+        uses: https://forgejo.wulf.science/WulfScience-FOSS/ci-actions/prepare-repo@v2
 
       - name: Tick phase gate checklist and flip status flags
         run: |
