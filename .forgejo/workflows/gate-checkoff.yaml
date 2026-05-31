@@ -40,8 +40,5 @@ jobs:
           repository: ${{ github.repository }}
           head: ${{ steps.gate.outputs.branch }}
           title: "chore(ci): check off Phase ${{ steps.gate.outputs.phase_num }} gate"
-          description: |
-            Automated gate check-off for Phase ${{ steps.gate.outputs.phase_num }}.
-
-            Triggered by merge of PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}
+          description: "Automated gate check-off for Phase ${{ steps.gate.outputs.phase_num }} triggered by merge of PR #${{ github.event.pull_request.number }}"
           token: ${{ secrets.FORGEJO_TOKEN }}
