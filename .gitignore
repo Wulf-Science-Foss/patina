@@ -2,7 +2,7 @@
 .env
 
 # Claude Code
-.claude/
+CLAUDE.local.md
 
 # Rust build artifacts
 /target/
