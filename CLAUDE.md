@@ -100,10 +100,15 @@ patina/
 Every feature MUST follow this sequence. No exceptions.
 
 ```
-PRIOR ART → SPEC → THREAT MODEL → TESTS (failing) → IMPLEMENTATION → TESTS (passing) → DOCS
+PRIOR ART → SPEC → THREAT MODEL → TESTS (failing) → IMPLEMENTATION → TESTS (passing) → DOCS → REVIEW → PR
 ```
 
 ### Phase Gate Checklist (per feature)
+
+These boxes are **checked off automatically** when the PR merges to `main`
+(see [CI / Actions](#ci--actions)). Do not tick them manually during
+development — an unchecked checklist on an open branch is the correct,
+expected state.
 
 - [ ] Prior art documented in `docs/prior-art/<feature>.md`
 - [ ] Specification written in `docs/specs/<feature>.spec.md`
@@ -116,6 +121,7 @@ PRIOR ART → SPEC → THREAT MODEL → TESTS (failing) → IMPLEMENTATION → T
 - [ ] `cargo audit` clean
 - [ ] Rustdoc on all public items
 - [ ] CHANGELOG.md updated
+- [ ] Review agent run on feature branch; all findings addressed (see [Review Policy](#review-policy))
 
 ---
 
@@ -210,8 +216,14 @@ Builds are run on both architectures. Multi-arch OCI images produced via apko on
 | `ci.yaml` | PR, push to main | cargo test, clippy, audit |
 | `image.yaml` | push to main | melange + apko build + grype scan |
 | `milestone-sync.yaml` | PR merged to main | parse roadmap markdown, sync Forgejo milestones via API |
+| `gate-checkoff.yaml` | PR merged to main | tick the phase gate checklist and flip phase/spec status flags for the merged feature |
 
 `milestone-sync.yaml` spec: [`docs/specs/ci-milestone-sync.spec.md`](docs/specs/ci-milestone-sync.spec.md)
+
+`gate-checkoff.yaml` is the single authority for marking work done: phase
+gate checkboxes, the roadmap Status column, and spec Status flags are
+flipped by this workflow on merge to `main` — never by hand. Spec to be
+written (`docs/specs/ci-gate-checkoff.spec.md`).
 
 ---
 
@@ -273,6 +285,72 @@ ACC-LIFECYCLE-001 through ACC-LIFECYCLE-004 now passing
 
 ---
 
+## Review Policy
+
+Before a PR is opened, the feature branch must be reviewed by a review agent
+running from a **fresh context with no knowledge of the current session**.
+The purpose is independent verification: the reviewer should be able to
+identify gaps, inconsistencies, and mistakes that the author cannot see.
+
+### The review loop
+
+The review is an iterative loop between two models. The reviewing model
+**must differ from the model that authored the work** — independent
+perspective is the point.
+
+1. **Author (model A)** completes the work on the feature branch.
+2. **Switch model**: `/model opus` (if Sonnet authored) or `/model sonnet`
+   (if Opus authored).
+3. **Review (model B)** runs `/code-review high` on the feature branch.
+4. **Record, do not fix.** Model B writes every finding to a review document
+   at `docs/reviews/<feature>-NNN.md`, where `NNN` is the review round
+   (`001`, `002`, …). The reviewer never fixes findings — recording and
+   fixing must be done by different models for the independence to hold.
+5. **Switch back** to the authoring model (model A).
+6. **Fix (model A)** resolves each finding and fills in its **Resolution**
+   field in the review doc (commit reference or deferral rationale).
+7. **Repeat** from step 2 with a new round (`NNN+1`) until a review round
+   produces no HIGH or MEDIUM findings.
+
+Only when a round is clean may the PR be opened. The latest review doc must
+be referenced in the PR description.
+
+### Severity handling
+
+`/code-review` ranks findings by severity. Disposition:
+
+| Severity | Disposition |
+|----------|-------------|
+| **High / Critical** | Must fix before PR. |
+| **Medium** | Must fix, or explicitly defer with rationale recorded in the review doc. |
+| **Low** | May defer; record as an open question or note. |
+
+### Review scope
+
+The review agent must check:
+
+- **Correctness**: do the changes do what they claim? Are there factual
+  errors, contradictions, or gaps?
+- **Completeness**: does the work satisfy the phase gate checklist? Are any
+  required documents missing or left as stubs?
+- **Consistency**: do the documents agree with each other? Do specs, ADRs,
+  and prior art findings align?
+- **Standards compliance**: does the work respect the standards documented
+  in `docs/prior-art/standards.md`?
+- **Scope**: does anything in the diff violate the Definition of Done or
+  reach into a phase that has not yet been gated?
+
+### Review documents
+
+Review findings live in `docs/reviews/`, one document per review round,
+named `<feature>-NNN.md`. Each finding records location, severity,
+description, and a Resolution field the author fills in. Dismissed findings
+are recorded too (with rationale) so later rounds do not re-raise them.
+Review documents are committed — they are the audit trail for the review
+gate, as required by the standards in `docs/prior-art/standards.md`.
+
+---
+
 ## Definition of Done
 
 A feature is done when:
@@ -284,7 +362,8 @@ A feature is done when:
 5. `cargo doc` generates without warnings
 6. CHANGELOG.md entry written
 7. THREAT_MODEL.md updated if attack surface changed
-8. PR reviewed and merged to main
+8. Review agent run (`/code-review high`) with a different model than the author; high findings addressed
+9. PR reviewed and merged to main
 
 ---
 
