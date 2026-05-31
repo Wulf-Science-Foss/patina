@@ -251,6 +251,9 @@ bash scripts/pr.sh --title "<title>" [--head <branch>] [--base <branch>] [--body
 
 Defaults: `--head` = current branch, `--base` = `main`.
 
+The `--body` must summarise **all** changes being merged (one bullet per logical change).
+Inspect `git log main..<head>` to ensure nothing is omitted before opening the PR.
+
 ### Commit format
 
 ```
