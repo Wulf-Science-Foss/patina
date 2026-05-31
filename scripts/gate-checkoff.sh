@@ -78,20 +78,31 @@ sed -i 's/^\*\*Status:\*\* TODO/**Status:** COMPLETE/' "$ROADMAP_FILE"
 CLAUDE_MD="${REPO_ROOT}/CLAUDE.md"
 sed -i "/Phase ${PHASE_NUM} /s/| TODO |/| COMPLETE |/" "$CLAUDE_MD"
 
-# REQ-GC-010: idempotency — skip commit if nothing changed.
+# REQ-GC-010: idempotency — skip when nothing changed.
 cd "$REPO_ROOT"
 if git diff --quiet "$ROADMAP_FILE" "$CLAUDE_MD"; then
-  echo "No changes (already COMPLETE). Nothing to commit."
+  echo "No changes (already COMPLETE). Nothing to do."
   exit 0
 fi
 
-# REQ-GC-008 / REQ-GC-009: commit as CI bot.
+# REQ-GC-008 / REQ-GC-009: create a branch and commit via shared helper.
+# The helper configures signing when ~/.ssh/signing_key is present (CI context,
+# populated by the prepare-ssh-signing action before this script runs).
 PR_REF=""
 [[ -n "$PR_NUMBER" ]] && PR_REF=" of PR #${PR_NUMBER}"
 
-git config user.name  "github-actions[bot]"
-git config user.email "github-actions[bot]@users.noreply.github.com"
-git add "$ROADMAP_FILE" "$CLAUDE_MD"
-git commit -m "chore(ci): check off Phase ${PHASE_NUM} gate on merge${PR_REF} [skip ci]"
+GATE_BRANCH="chore/gate-checkoff-phase-${PHASE_NUM}"
+[[ -n "$PR_NUMBER" ]] && GATE_BRANCH="${GATE_BRANCH}--pr-${PR_NUMBER}"
 
-echo "Gate check-off complete for Phase ${PHASE_NUM}."
+bash "${SCRIPT_DIR}/commit-and-push.sh" \
+  --branch  "$GATE_BRANCH" \
+  --message "chore(ci): check off Phase ${PHASE_NUM} gate on merge${PR_REF}" \
+  -- "$ROADMAP_FILE" "$CLAUDE_MD"
+
+# Expose outputs for the create-pr workflow step.
+if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
+  echo "branch=${GATE_BRANCH}"  >> "$GITHUB_OUTPUT"
+  echo "phase_num=${PHASE_NUM}" >> "$GITHUB_OUTPUT"
+fi
+
+echo "Gate check-off branch '${GATE_BRANCH}' ready for PR."
