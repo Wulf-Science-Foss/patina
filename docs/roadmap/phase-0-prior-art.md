@@ -58,3 +58,12 @@ Output: [`docs/prior-art/SUMMARY.md`](../prior-art/SUMMARY.md)
 - [ ] Synthesise all five analyses above (0.1–0.5)
 - [ ] Define the initial domain vocabulary (ubiquitous language)
 - [ ] **Gate:** do not proceed to Phase 1 until this is reviewed and committed
+
+## Phase Gate Checklist
+
+- [ ] OpenPLM schema documented (`docs/prior-art/openplm-schema.md`)
+- [ ] Aras Innovator data model documented (`docs/prior-art/aras-schema.md`)
+- [ ] FreeCAD community needs documented (`docs/prior-art/freecad-community-needs.md`)
+- [ ] Teamcenter feature baseline documented (`docs/prior-art/teamcenter-baseline.md`)
+- [ ] Standards analysis documented (`docs/prior-art/standards.md`)
+- [ ] Prior art summary written and reviewed (`docs/prior-art/SUMMARY.md`)
