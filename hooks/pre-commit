@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+set -eu
+
+BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || true)
+
+if [ "$BRANCH" = "main" ]; then
+  echo "ERROR: direct commits to main are not allowed." >&2
+  echo "       Create a feature branch and open a PR." >&2
+  exit 1
+fi

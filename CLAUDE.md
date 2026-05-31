@@ -240,6 +240,20 @@ Note: Git does not allow a branch and its own path-prefix to coexist, so sub-bra
 
 Each feature is started with a fresh context. Do not carry assumptions or state from a previous feature session. Rely on CLAUDE.md, specs, ADRs, and test output — not on memory of prior conversations.
 
+### Opening pull requests
+
+Always use `scripts/pr.sh` to open PRs — never `gh` or direct `curl`. The script reads
+credentials from `.env` and posts to the Forgejo API.
+
+```
+bash scripts/pr.sh --title "<title>" [--head <branch>] [--base <branch>] [--body <text>]
+```
+
+Defaults: `--head` = current branch, `--base` = `main`.
+
+The `--body` must summarise **all** changes being merged (one bullet per logical change).
+Inspect `git log main..<head>` to ensure nothing is omitted before opening the PR.
+
 ### Commit format
 
 ```
