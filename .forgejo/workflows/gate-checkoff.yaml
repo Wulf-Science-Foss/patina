@@ -21,8 +21,27 @@ jobs:
       - name: Prepare repo
         uses: https://forgejo.wulf.science/WulfScience-FOSS/ci-actions/prepare-repo@v2
 
-      - name: Tick phase gate checklist and flip status flags
+      - name: Prepare SSH signing key
+        uses: https://forgejo.wulf.science/WulfScience-FOSS/ci-actions/prepare-ssh-signing@v2
+        with:
+          signing_key: ${{ secrets.CI_SIGNING_KEY }}
+
+      - name: Tick phase gate checklist and create check-off branch
+        id: gate
         run: |
           bash scripts/gate-checkoff.sh \
             --branch "${{ github.event.pull_request.head.ref }}" \
             --pr-number "${{ github.event.pull_request.number }}"
+
+      - name: Open and merge gate check-off PR
+        if: ${{ steps.gate.outputs.branch != '' }}
+        uses: https://forgejo.wulf.science/WulfScience-FOSS/ci-actions/create-pr@v2
+        with:
+          repository: ${{ github.repository }}
+          head: ${{ steps.gate.outputs.branch }}
+          title: "chore(ci): check off Phase ${{ steps.gate.outputs.phase_num }} gate"
+          description: |
+            Automated gate check-off for Phase ${{ steps.gate.outputs.phase_num }}.
+
+            Triggered by merge of PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}
+          token: ${{ secrets.FORGEJO_TOKEN }}
