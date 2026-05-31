@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # milestone-sync.sh — Sync Forgejo milestones from phase roadmap checklists.
 # Source of truth: docs/roadmap/phase-*.md (## Phase Gate Checklist sections).
+# For each checklist item, a Forgejo issue is created/maintained in the milestone.
 # Idempotent: safe to run multiple times.
 #
 # Usage:
@@ -105,6 +106,7 @@ Phase gate checklist status:
 
 for ROADMAP_FILE in $(ls "${REPO_ROOT}/docs/roadmap/phase-"*.md | sort); do
   PHASE_TITLE=$(grep -m1 '^# ' "$ROADMAP_FILE" | sed 's/^# //')
+  PHASE_SHORT=$(printf '%s' "$PHASE_TITLE" | grep -oE 'Phase [0-9]+')
 
   read -r CHECKED TOTAL <<< "$(awk '
     /^## Phase Gate Checklist/ { in_s=1; next }
@@ -137,7 +139,48 @@ for ROADMAP_FILE in $(ls "${REPO_ROOT}/docs/roadmap/phase-"*.md | sort); do
   if [ -n "$MILESTONE_ID" ] && [ "$MILESTONE_ID" != "null" ]; then
     api_patch "repos/${REPO_PATH}/milestones/${MILESTONE_ID}" \
       "$(jq -n --arg d "$DESC" --arg s "$WANT_STATE" '{"description":$d,"state":$s}')"
-    echo "  → state=${WANT_STATE}"
+    echo "  → milestone state=${WANT_STATE}"
+
+    # Fetch all issues currently assigned to this milestone for idempotency checks
+    MILESTONE_ISSUES=$(api_get \
+      "repos/${REPO_PATH}/issues?type=issues&milestone=${MILESTONE_ID}&state=all&limit=50")
+
+    while IFS= read -r item_line; do
+      if [[ "$item_line" =~ ^[[:space:]]*-\ \[([ x])\]\ (.*) ]]; then
+        item_state="${BASH_REMATCH[1]}"
+        item_text="${BASH_REMATCH[2]}"
+        issue_title="[${PHASE_SHORT}] ${item_text}"
+        item_want_state="open"
+        [ "$item_state" = "x" ] && item_want_state="closed"
+
+        existing_issue=$(printf '%s' "$MILESTONE_ISSUES" \
+          | jq -r --arg t "$issue_title" \
+            '.[] | select(.title == $t) | {number: .number, state: .state} | @json' \
+          | head -1)
+
+        if [ -z "$existing_issue" ] || [ "$existing_issue" = "null" ]; then
+          echo "  Creating issue: ${issue_title} [${item_want_state}]"
+          NEW_ISSUE=$(api_post "repos/${REPO_PATH}/issues" \
+            "$(jq -n --arg t "$issue_title" --argjson m "$MILESTONE_ID" \
+              '{"title":$t,"milestone":$m}')")
+          if [ "$item_want_state" = "closed" ]; then
+            issue_num=$(printf '%s' "$NEW_ISSUE" | jq -r '.number // empty')
+            if [ -n "$issue_num" ] && [ "$issue_num" != "null" ]; then
+              api_patch "repos/${REPO_PATH}/issues/${issue_num}" \
+                "$(jq -n '{"state":"closed"}')"
+            fi
+          fi
+        else
+          issue_num=$(printf '%s' "$existing_issue" | jq -r '.number')
+          current_issue_state=$(printf '%s' "$existing_issue" | jq -r '.state')
+          if [ "$current_issue_state" != "$item_want_state" ]; then
+            echo "  Issue #${issue_num}: ${current_issue_state} → ${item_want_state}"
+            api_patch "repos/${REPO_PATH}/issues/${issue_num}" \
+              "$(jq -n --arg s "$item_want_state" '{"state":$s}')"
+          fi
+        fi
+      fi
+    done < <(awk '/^## Phase Gate Checklist/{f=1;next} f && /^## /{exit} f{print}' "$ROADMAP_FILE")
   fi
 
   STATUS_MARK="[ ]"
